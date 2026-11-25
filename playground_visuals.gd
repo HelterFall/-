@@ -37,7 +37,7 @@ func _build_seesaw(root: Node3D) -> void:
 	pivot.position = Vector3(3.2, 0.0, -14.55)
 	pivot.rotation.z = -0.10
 	root.add_child(pivot)
-	var metal := _material(Color(0.17, 0.22, 0.28), 0.68)
+	var metal := _weathered_metal(Color(0.17, 0.22, 0.28), 0.75, 0.24, 0.40)
 	var red := _material(Color(0.47, 0.18, 0.16), 0.64)
 	var yellow := _material(Color(0.68, 0.49, 0.22), 0.70)
 	var snow := _material(Color(0.65, 0.72, 0.81), 0.95)
@@ -57,7 +57,7 @@ func _build_climbing_frame(root: Node3D) -> void:
 	var frame := Node3D.new()
 	frame.position = Vector3(-6.7, 0.0, -12.7)
 	root.add_child(frame)
-	var metal := _material(Color(0.16, 0.22, 0.28), 0.65)
+	var metal := _weathered_metal(Color(0.16, 0.22, 0.28), 0.75, 0.28, 0.42)
 	var worn_red := _material(Color(0.44, 0.19, 0.17), 0.72)
 	var snow := _material(Color(0.66, 0.73, 0.82), 0.95)
 	for side in [-1.0, 1.0]:
@@ -131,6 +131,16 @@ func _rod(parent: Node3D, start: Vector3, finish: Vector3, radius: float, materi
 	instance.material_override = material
 	parent.add_child(instance)
 	return instance
+
+
+func _weathered_metal(color: Color, metalness: float, rust_strength: float, wear_strength: float) -> ShaderMaterial:
+	var result := ShaderMaterial.new()
+	result.shader = load("res://materials/weathered_metal.gdshader")
+	result.set_shader_parameter("base_color", color)
+	result.set_shader_parameter("metalness", metalness)
+	result.set_shader_parameter("rust_strength", rust_strength)
+	result.set_shader_parameter("wear_strength", wear_strength)
+	return result
 
 
 func _material(color: Color, roughness: float = 0.92, emission: Color = Color.BLACK) -> StandardMaterial3D:

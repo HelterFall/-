@@ -21,10 +21,10 @@ func _build_entrance(root: Node3D, origin: Vector3, yaw: float, building_number:
 	root.add_child(entrance)
 
 	var concrete := _material(Color(0.45, 0.48, 0.52), 0.93)
-	var dark_metal := _material(Color(0.13, 0.17, 0.22), 0.66)
+	var dark_metal := _weathered_metal(Color(0.13, 0.17, 0.22), 0.76, 0.32, 0.42)
 	var door_paint := _material(Color(0.19, 0.24, 0.30), 0.56)
 	var glass := _material(Color(0.11, 0.17, 0.23), 0.25)
-	var steel := _material(Color(0.42, 0.47, 0.52), 0.42)
+	var steel := _weathered_metal(Color(0.42, 0.47, 0.52), 0.82, 0.12, 0.22)
 	var snow := _material(Color(0.67, 0.74, 0.83), 0.94)
 	var warm := _material(Color(1.0, 0.76, 0.50), 0.18, Color(1.0, 0.45, 0.13))
 	warm.emission_energy_multiplier = 2.4
@@ -85,8 +85,8 @@ func _build_air_conditioners(root: Node3D, origin: Vector3, yaw: float, width: f
 	facade.position = origin
 	facade.rotation.y = yaw
 	root.add_child(facade)
-	var paint := _material(Color(0.48, 0.52, 0.56), 0.84)
-	var grille := _material(Color(0.13, 0.17, 0.21), 0.78)
+	var paint := _weathered_metal(Color(0.48, 0.52, 0.56), 0.38, 0.14, 0.32)
+	var grille := _weathered_metal(Color(0.13, 0.17, 0.21), 0.72, 0.20, 0.44)
 	var pipe := _material(Color(0.24, 0.29, 0.34), 0.72)
 	var columns := int(width / 2.35)
 	var bodies: Array[Transform3D] = []
@@ -107,7 +107,7 @@ func _build_air_conditioners(root: Node3D, origin: Vector3, yaw: float, width: f
 
 
 func _build_playground_fence(root: Node3D) -> void:
-	var paint := _material(Color(0.15, 0.20, 0.26), 0.64)
+	var paint := _weathered_metal(Color(0.15, 0.20, 0.26), 0.74, 0.28, 0.48)
 	var snow := _material(Color(0.63, 0.70, 0.79), 0.92)
 	for x in [-8.0, 8.0]:
 		for segment in range(6):
@@ -127,8 +127,8 @@ func _build_trash_container(root: Node3D, origin: Vector3, yaw: float) -> void:
 	container.position = origin
 	container.rotation.y = yaw
 	root.add_child(container)
-	var body := _material(Color(0.19, 0.24, 0.30), 0.78)
-	var rim := _material(Color(0.35, 0.40, 0.45), 0.58)
+	var body := _weathered_metal(Color(0.19, 0.24, 0.30), 0.64, 0.28, 0.34)
+	var rim := _weathered_metal(Color(0.35, 0.40, 0.45), 0.82, 0.22, 0.26)
 	var dark := _material(Color(0.07, 0.09, 0.12), 0.94)
 	var snow := _material(Color(0.66, 0.73, 0.82), 0.94)
 	_box(container, Vector3(0.0, 0.68, 0.0), Vector3(1.25, 1.28, 0.88), body)
@@ -144,7 +144,7 @@ func _build_trash_container(root: Node3D, origin: Vector3, yaw: float) -> void:
 
 
 func _build_street_details(root: Node3D) -> void:
-	var bollard := _material(Color(0.14, 0.18, 0.23), 0.66)
+	var bollard := _weathered_metal(Color(0.14, 0.18, 0.23), 0.62, 0.34, 0.42)
 	var snow := _material(Color(0.67, 0.74, 0.83), 0.94)
 	var curb := _material(Color(0.34, 0.38, 0.44), 0.92)
 	var ice := _material(Color(0.28, 0.39, 0.52), 0.22)
@@ -250,6 +250,16 @@ func _rod(parent: Node3D, start: Vector3, finish: Vector3, radius: float, materi
 	instance.material_override = material
 	parent.add_child(instance)
 	return instance
+
+
+func _weathered_metal(color: Color, metalness: float, rust_strength: float, wear_strength: float) -> ShaderMaterial:
+	var result := ShaderMaterial.new()
+	result.shader = load("res://materials/weathered_metal.gdshader")
+	result.set_shader_parameter("base_color", color)
+	result.set_shader_parameter("metalness", metalness)
+	result.set_shader_parameter("rust_strength", rust_strength)
+	result.set_shader_parameter("wear_strength", wear_strength)
+	return result
 
 
 func _material(color: Color, roughness: float = 0.92, emission: Color = Color.BLACK) -> StandardMaterial3D:

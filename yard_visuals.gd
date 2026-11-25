@@ -147,8 +147,8 @@ func _build_street_details(root: Node3D) -> void:
 	var bollard := _weathered_metal(Color(0.14, 0.18, 0.23), 0.62, 0.34, 0.42)
 	var snow := _material(Color(0.67, 0.74, 0.83), 0.94)
 	var curb := _material(Color(0.34, 0.38, 0.44), 0.92)
-	var ice := _material(Color(0.28, 0.39, 0.52), 0.22)
-	var slush := _material(Color(0.17, 0.22, 0.29), 0.72)
+	var ice := _wet_surface(Color(0.28, 0.39, 0.52), Color(0.14, 0.21, 0.32), 0.92)
+	var slush := _wet_surface(Color(0.17, 0.22, 0.29), Color(0.10, 0.14, 0.19), 0.42)
 	var track := _material(Color(0.15, 0.20, 0.27), 0.84)
 	for x in [-5.4, 5.4]:
 		for z in [3.6, 7.0, 10.4]:
@@ -250,6 +250,16 @@ func _rod(parent: Node3D, start: Vector3, finish: Vector3, radius: float, materi
 	instance.material_override = material
 	parent.add_child(instance)
 	return instance
+
+
+func _wet_surface(base: Color, fleck: Color, wetness: float) -> ShaderMaterial:
+	var result := ShaderMaterial.new()
+	result.shader = load("res://materials/wet_ice_slush.gdshader")
+	result.set_shader_parameter("base_color", base)
+	result.set_shader_parameter("fleck_color", fleck)
+	result.set_shader_parameter("wetness", wetness)
+	result.set_shader_parameter("grain_scale", 54.0)
+	return result
 
 
 func _weathered_metal(color: Color, metalness: float, rust_strength: float, wear_strength: float) -> ShaderMaterial:

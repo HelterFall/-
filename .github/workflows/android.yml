@@ -62,20 +62,20 @@ jobs:
           export/android/java_sdk_path = "$JAVA_HOME"
           EOF
 
-      - name: Import project assets
+      - name: Import Compatibility project assets
         run: godot --headless --editor --path . --quit
 
-      - name: Headless runtime smoke test
+      - name: Compatibility runtime smoke test
         shell: bash
         run: |
           set -euo pipefail
-          godot --headless --path . --quit-after 6 2>&1 | tee /tmp/godot-smoke.log
-          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" /tmp/godot-smoke.log; then
-            echo "Godot runtime smoke test reported a script error."
+          godot --headless --path . --quit-after 6 2>&1 | tee /tmp/godot-compat-smoke.log
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|Parent node is busy setting up children" /tmp/godot-compat-smoke.log; then
+            echo "Compatibility runtime smoke test reported an error."
             exit 1
           fi
 
-      - name: Export APK
+      - name: Export Compatibility APK
         run: |
           mkdir -p build
           export GODOT_ANDROID_KEYSTORE_DEBUG_PATH="$HOME/.android/debug.keystore"
@@ -83,15 +83,53 @@ jobs:
           export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD="android"
           godot --headless --path . --export-debug "Android" build/Dvor.apk
 
-      - name: Verify APK
+      - name: Switch project to Mobile renderer
+        shell: bash
+        run: |
+          set -euo pipefail
+          sed -i 's/renderer\/rendering_method="gl_compatibility"/renderer\/rendering_method="mobile"/' project.godot
+          sed -i 's/renderer\/rendering_method.mobile="gl_compatibility"/renderer\/rendering_method.mobile="mobile"/' project.godot
+          grep -E 'renderer/rendering_method' project.godot
+
+      - name: Import Mobile project assets
+        run: godot --headless --editor --path . --quit
+
+      - name: Mobile runtime smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          godot --headless --path . --quit-after 6 2>&1 | tee /tmp/godot-mobile-smoke.log
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|Parent node is busy setting up children" /tmp/godot-mobile-smoke.log; then
+            echo "Mobile runtime smoke test reported an error."
+            exit 1
+          fi
+
+      - name: Export Mobile APK
+        run: |
+          export GODOT_ANDROID_KEYSTORE_DEBUG_PATH="$HOME/.android/debug.keystore"
+          export GODOT_ANDROID_KEYSTORE_DEBUG_USER="androiddebugkey"
+          export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD="android"
+          godot --headless --path . --export-debug "Android Mobile" build/Dvor-Mobile.apk
+
+      - name: Verify both APKs
         run: |
           test -s build/Dvor.apk
-          file build/Dvor.apk
+          test -s build/Dvor-Mobile.apk
+          file build/Dvor.apk build/Dvor-Mobile.apk
+          ls -lh build/Dvor.apk build/Dvor-Mobile.apk
 
-      - name: Upload APK artifact
+      - name: Upload Compatibility APK
         uses: actions/upload-artifact@v4
         with:
-          name: Dvor-Android-APK
+          name: Dvor-Android-Compatibility
           path: build/Dvor.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload Mobile APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Dvor-Android-Mobile
+          path: build/Dvor-Mobile.apk
           if-no-files-found: error
           retention-days: 30

@@ -145,9 +145,20 @@ func _build_building(origin: Vector3, angle: float, width: float, floors: int) -
 	var concrete := _material(Color(0.47, 0.50, 0.54), 0.94)
 	var frame := _material(Color(0.18, 0.22, 0.28), 0.72)
 	var sill := _material(Color(0.43, 0.46, 0.50), 0.90)
-	var dark_glass := _material(Color(0.025, 0.046, 0.078), 0.24)
-	var lit_glass := _material(Color(0.96, 0.66, 0.34), 0.26, Color(1.0, 0.48, 0.16))
-	lit_glass.emission_energy_multiplier = 2.1
+	var dark_glass := _material(Color(0.025, 0.046, 0.078), 0.24, Color(0.025, 0.04, 0.065))
+	var lit_glass := _material(Color(0.96, 0.66, 0.34, 0.58), 0.26, Color(1.0, 0.48, 0.16))
+	lit_glass.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	lit_glass.emission_energy_multiplier = 1.45
+	var room_glow := _material(Color(0.64, 0.43, 0.24), 0.96, Color(0.22, 0.11, 0.035))
+	room_glow.emission_energy_multiplier = 0.34
+	var curtain_material := _material(Color(0.24, 0.27, 0.31), 0.95)
+	var frame_left: Array[Transform3D] = []
+	var frame_right: Array[Transform3D] = []
+	var frame_top: Array[Transform3D] = []
+	var frame_bottom: Array[Transform3D] = []
+	var interior_transforms: Array[Transform3D] = []
+	var curtain_left: Array[Transform3D] = []
+	var curtain_right: Array[Transform3D] = []
 	var balcony_metal := _material(Color(0.12, 0.16, 0.21), 0.54)
 	var roof_snow := _material(Color(0.65, 0.72, 0.81), 0.93)
 	var height := 2.55 * float(floors)
@@ -156,7 +167,6 @@ func _build_building(origin: Vector3, angle: float, width: float, floors: int) -
 	_box(building, Vector3(0.0, height + 0.40, 0.0), Vector3(width + 0.9, 0.09, 6.35), roof_snow)
 	_box(building, Vector3(0.0, 0.48, 2.92), Vector3(width, 0.8, 0.18), side_wall)
 	var columns := int(width / 2.35)
-	var frames: Array[Transform3D] = []
 	var dark_glass_transforms: Array[Transform3D] = []
 	var lit_glass_transforms: Array[Transform3D] = []
 	var sills: Array[Transform3D] = []
@@ -171,14 +181,20 @@ func _build_building(origin: Vector3, angle: float, width: float, floors: int) -
 		_box(building, Vector3(0.0, float(floor_index) * 2.55 + 0.05, 2.91), Vector3(width, 0.12, 0.22), concrete)
 		for column in range(columns):
 			var x := -width * 0.5 + 1.25 + float(column) * (width - 2.5) / maxf(1.0, float(columns - 1))
-			frames.append(Transform3D(Basis.IDENTITY, Vector3(x, y, 3.025)))
+			frame_left.append(Transform3D(Basis.IDENTITY, Vector3(x - 0.68, y, 3.13)))
+			frame_right.append(Transform3D(Basis.IDENTITY, Vector3(x + 0.68, y, 3.13)))
+			frame_top.append(Transform3D(Basis.IDENTITY, Vector3(x, y + 0.80, 3.13)))
+			frame_bottom.append(Transform3D(Basis.IDENTITY, Vector3(x, y - 0.80, 3.13)))
 			if rng.randf() < 0.20:
-				lit_glass_transforms.append(Transform3D(Basis.IDENTITY, Vector3(x, y, 3.115)))
+				lit_glass_transforms.append(Transform3D(Basis.IDENTITY, Vector3(x, y, 3.06)))
+				interior_transforms.append(Transform3D(Basis.IDENTITY, Vector3(x, y, 2.90)))
+				curtain_left.append(Transform3D(Basis.IDENTITY, Vector3(x - 0.47, y, 2.99)))
+				curtain_right.append(Transform3D(Basis.IDENTITY, Vector3(x + 0.47, y, 2.99)))
 			else:
-				dark_glass_transforms.append(Transform3D(Basis.IDENTITY, Vector3(x, y, 3.115)))
+				dark_glass_transforms.append(Transform3D(Basis.IDENTITY, Vector3(x, y, 3.06)))
 			sills.append(Transform3D(Basis.IDENTITY, Vector3(x, y - 0.86, 3.12)))
 			hoods.append(Transform3D(Basis.IDENTITY, Vector3(x, y + 0.86, 3.10)))
-			mullions.append(Transform3D(Basis.IDENTITY, Vector3(x, y, 3.16)))
+			mullions.append(Transform3D(Basis.IDENTITY, Vector3(x, y, 3.13)))
 			if floor_index > 0 and floor_index % 2 == 1 and column % 4 == 1:
 				balcony_decks.append(Transform3D(Basis.IDENTITY, Vector3(x, y - 1.00, 3.68)))
 				balcony_fronts.append(Transform3D(Basis.IDENTITY, Vector3(x, y - 0.47, 4.18)))
@@ -187,9 +203,15 @@ func _build_building(origin: Vector3, angle: float, width: float, floors: int) -
 				for post_index in range(7):
 					var post_x := x - 0.82 + float(post_index) * 0.273
 					balcony_posts.append(Transform3D(Basis.IDENTITY, Vector3(post_x, y - 0.80, 4.18)))
-	_multimesh_boxes(building, Vector3(1.48, 1.76, 0.14), frame, frames)
+	_multimesh_boxes(building, Vector3(0.105, 1.62, 0.13), frame, frame_left)
+	_multimesh_boxes(building, Vector3(0.105, 1.62, 0.13), frame, frame_right)
+	_multimesh_boxes(building, Vector3(1.42, 0.105, 0.13), frame, frame_top)
+	_multimesh_boxes(building, Vector3(1.42, 0.105, 0.13), frame, frame_bottom)
 	_multimesh_boxes(building, Vector3(1.28, 1.52, 0.055), dark_glass, dark_glass_transforms)
 	_multimesh_boxes(building, Vector3(1.28, 1.52, 0.055), lit_glass, lit_glass_transforms)
+	_multimesh_boxes(building, Vector3(1.16, 1.38, 0.035), room_glow, interior_transforms)
+	_multimesh_boxes(building, Vector3(0.22, 1.33, 0.045), curtain_material, curtain_left)
+	_multimesh_boxes(building, Vector3(0.22, 1.33, 0.045), curtain_material, curtain_right)
 	_multimesh_boxes(building, Vector3(1.56, 0.11, 0.30), sill, sills)
 	_multimesh_boxes(building, Vector3(1.52, 0.075, 0.22), frame, hoods)
 	_multimesh_boxes(building, Vector3(0.045, 1.48, 0.07), frame, mullions)

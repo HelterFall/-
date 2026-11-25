@@ -30,44 +30,97 @@ func _material(color: Color, roughness: float = 0.92, emission: Color = Color.BL
 
 
 func _build_world_environment() -> void:
+	var sky := Sky.new()
+	var sky_material := ProceduralSkyMaterial.new()
+	sky_material.sky_top_color = Color(0.006, 0.015, 0.046)
+	sky_material.sky_horizon_color = Color(0.045, 0.072, 0.12)
+	sky_material.ground_bottom_color = Color(0.008, 0.015, 0.027)
+	sky_material.ground_horizon_color = Color(0.034, 0.052, 0.078)
+	sky_material.sky_energy_multiplier = 0.82
+	sky_material.ground_energy_multiplier = 0.48
+	sky_material.use_debanding = true
+
+	var stars := Image.create(1024, 512, false, Image.FORMAT_RGBA8)
+	stars.fill(Color.BLACK)
+	for star_index in range(360):
+		var star_x := rng.randi_range(0, 1023)
+		var star_y := rng.randi_range(8, 365)
+		var brightness := rng.randf_range(0.28, 0.92)
+		stars.set_pixel(star_x, star_y, Color(brightness * 0.76, brightness * 0.86, brightness, 1.0))
+	sky_material.sky_cover = ImageTexture.create_from_image(stars)
+	sky_material.sky_cover_modulate = Color(0.78, 0.86, 1.0, 0.88)
+	sky.sky_material = sky_material
+
 	var world := WorldEnvironment.new()
 	var environment := Environment.new()
-	environment.background_mode = Environment.BG_COLOR
-	environment.background_color = Color(0.006, 0.012, 0.027)
-	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color(0.19, 0.25, 0.38)
-	environment.ambient_light_energy = 0.32
+	environment.background_mode = Environment.BG_SKY
+	environment.sky = sky
+	environment.ambient_light_source = Environment.AMBIENT_SOURCE_BG
+	environment.ambient_light_energy = 0.46
+	environment.ambient_light_sky_contribution = 0.82
 	environment.reflected_light_source = Environment.REFLECTION_SOURCE_BG
 	environment.fog_enabled = true
-	environment.fog_light_color = Color(0.12, 0.17, 0.27)
-	environment.fog_density = 0.012
+	environment.fog_light_color = Color(0.105, 0.145, 0.22)
+	environment.fog_light_energy = 0.88
+	environment.fog_density = 0.0075
+	environment.fog_depth_begin = 10.0
+	environment.fog_depth_end = 86.0
+	environment.fog_depth_curve = 1.35
+	environment.fog_height = -1.2
+	environment.fog_height_density = 0.028
+	environment.fog_sky_affect = 0.22
+	environment.ssao_enabled = true
+	environment.ssao_radius = 1.25
+	environment.ssao_intensity = 1.45
+	environment.ssao_power = 1.28
+	environment.ssao_detail = 0.42
+	environment.glow_enabled = true
+	environment.glow_intensity = 0.62
+	environment.glow_bloom = 0.10
+	environment.glow_hdr_threshold = 0.88
 	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	environment.adjustment_enabled = true
+	environment.adjustment_brightness = 1.02
+	environment.adjustment_contrast = 1.10
+	environment.adjustment_saturation = 0.88
 	world.environment = environment
 	add_child(world)
 
 	var moonlight := DirectionalLight3D.new()
-	moonlight.rotation_degrees = Vector3(-48.0, -28.0, 0.0)
-	moonlight.light_color = Color(0.46, 0.58, 0.82)
-	moonlight.light_energy = 0.22
+	moonlight.rotation_degrees = Vector3(-46.0, -32.0, 0.0)
+	moonlight.light_color = Color(0.48, 0.61, 0.88)
+	moonlight.light_energy = 0.34
 	moonlight.shadow_enabled = true
+	moonlight.directional_shadow_max_distance = 72.0
 	add_child(moonlight)
 
-
 func _build_ground() -> void:
-	var snow := _material(Color(0.48, 0.55, 0.65))
-	var packed_snow := _material(Color(0.22, 0.28, 0.37))
+	var snow := ShaderMaterial.new()
+	snow.shader = load("res://materials/snow_ground.gdshader")
+	snow.set_shader_parameter("snow_color", Color(0.53, 0.61, 0.72))
+	snow.set_shader_parameter("ice_color", Color(0.20, 0.28, 0.40))
+	snow.set_shader_parameter("ice_amount", 0.18)
+	var packed_snow := ShaderMaterial.new()
+	packed_snow.shader = load("res://materials/snow_ground.gdshader")
+	packed_snow.set_shader_parameter("snow_color", Color(0.22, 0.29, 0.39))
+	packed_snow.set_shader_parameter("ice_color", Color(0.12, 0.19, 0.29))
+	packed_snow.set_shader_parameter("ice_amount", 0.68)
 	_box(self, Vector3(0.0, -0.24, -8.0), Vector3(100.0, 0.48, 100.0), snow, true)
 	_box(self, Vector3(0.0, 0.015, 6.0), Vector3(3.4, 0.035, 45.0), packed_snow)
 	_box(self, Vector3(-7.0, 0.015, -9.0), Vector3(1.2, 0.035, 30.0), packed_snow)
 	_box(self, Vector3(7.0, 0.015, -9.0), Vector3(1.2, 0.035, 30.0), packed_snow)
-
-	var drift_material := _material(Color(0.63, 0.69, 0.77))
-	for i in range(42):
-		var x := rng.randf_range(-18.0, 18.0)
-		var z := rng.randf_range(-29.0, 18.0)
-		var mound := _sphere(self, Vector3(x, 0.10, z), Vector3(rng.randf_range(0.45, 1.8), rng.randf_range(0.12, 0.36), rng.randf_range(0.45, 1.25)), drift_material)
+	var drift_material := _material(Color(0.68, 0.75, 0.84), 0.96)
+	for i in range(48):
+		var x := rng.randf_range(-19.0, 19.0)
+		var z := rng.randf_range(-31.0, 19.0)
+		var mound := _sphere(self, Vector3(x, 0.10, z), Vector3(rng.randf_range(0.45, 1.85), rng.randf_range(0.12, 0.38), rng.randf_range(0.45, 1.35)), drift_material)
 		mound.rotation.y = rng.randf_range(0.0, TAU)
-
+	var print_material := _material(Color(0.28, 0.36, 0.48), 0.88)
+	for step_index in range(42):
+		var z := 13.0 - float(step_index) * 0.72
+		var side := -1.0 if step_index % 2 == 0 else 1.0
+		var print_mark := _sphere(self, Vector3(side * rng.randf_range(0.10, 0.24), 0.039, z), Vector3(0.082, 0.014, 0.16), print_material)
+		print_mark.rotation.y = rng.randf_range(-0.16, 0.16)
 
 func _build_buildings() -> void:
 	_build_building(Vector3(-20.0, 0.0, -10.0), PI * 0.5, 34.0, 8)
@@ -80,30 +133,69 @@ func _build_building(origin: Vector3, angle: float, width: float, floors: int) -
 	building.position = origin
 	building.rotation.y = angle
 	add_child(building)
-
-	var wall := _material(Color(0.30, 0.34, 0.40))
-	var side_wall := _material(Color(0.21, 0.25, 0.31))
-	var concrete := _material(Color(0.42, 0.45, 0.49))
-	var dark_glass := _material(Color(0.035, 0.065, 0.11), 0.28)
-	var lit_glass := _material(Color(0.85, 0.59, 0.28), 0.3, Color(1.0, 0.43, 0.12))
+	var wall := ShaderMaterial.new()
+	wall.shader = load("res://materials/panel_concrete.gdshader")
+	wall.set_shader_parameter("base_color", Color(0.37, 0.40, 0.45))
+	var side_wall := ShaderMaterial.new()
+	side_wall.shader = load("res://materials/panel_concrete.gdshader")
+	side_wall.set_shader_parameter("base_color", Color(0.25, 0.29, 0.35))
+	var concrete := _material(Color(0.47, 0.50, 0.54), 0.94)
+	var frame := _material(Color(0.18, 0.22, 0.28), 0.72)
+	var sill := _material(Color(0.43, 0.46, 0.50), 0.90)
+	var dark_glass := _material(Color(0.025, 0.046, 0.078), 0.24)
+	var lit_glass := _material(Color(0.96, 0.66, 0.34), 0.26, Color(1.0, 0.48, 0.16))
+	lit_glass.emission_energy_multiplier = 2.1
+	var balcony_metal := _material(Color(0.12, 0.16, 0.21), 0.54)
+	var roof_snow := _material(Color(0.65, 0.72, 0.81), 0.93)
 	var height := 2.55 * float(floors)
 	_box(building, Vector3(0.0, height * 0.5, 0.0), Vector3(width, height, 5.7), wall)
 	_box(building, Vector3(0.0, height + 0.18, 0.0), Vector3(width + 0.6, 0.36, 6.1), concrete)
+	_box(building, Vector3(0.0, height + 0.40, 0.0), Vector3(width + 0.9, 0.09, 6.35), roof_snow)
 	_box(building, Vector3(0.0, 0.48, 2.92), Vector3(width, 0.8, 0.18), side_wall)
-
 	var columns := int(width / 2.35)
+	var frames: Array[Transform3D] = []
+	var dark_glass_transforms: Array[Transform3D] = []
+	var lit_glass_transforms: Array[Transform3D] = []
+	var sills: Array[Transform3D] = []
+	var hoods: Array[Transform3D] = []
+	var mullions: Array[Transform3D] = []
+	var balcony_decks: Array[Transform3D] = []
+	var balcony_fronts: Array[Transform3D] = []
+	var balcony_sides: Array[Transform3D] = []
+	var balcony_posts: Array[Transform3D] = []
 	for floor_index in range(floors):
 		var y := 1.35 + float(floor_index) * 2.48
 		_box(building, Vector3(0.0, float(floor_index) * 2.55 + 0.05, 2.91), Vector3(width, 0.12, 0.22), concrete)
 		for column in range(columns):
 			var x := -width * 0.5 + 1.25 + float(column) * (width - 2.5) / maxf(1.0, float(columns - 1))
-			var is_lit := rng.randf() < 0.22
-			var glass := lit_glass if is_lit else dark_glass
-			_box(building, Vector3(x, y, 2.99), Vector3(1.30, 1.54, 0.09), glass)
-
+			frames.append(Transform3D(Basis.IDENTITY, Vector3(x, y, 3.025)))
+			if rng.randf() < 0.20:
+				lit_glass_transforms.append(Transform3D(Basis.IDENTITY, Vector3(x, y, 3.115)))
+			else:
+				dark_glass_transforms.append(Transform3D(Basis.IDENTITY, Vector3(x, y, 3.115)))
+			sills.append(Transform3D(Basis.IDENTITY, Vector3(x, y - 0.86, 3.12)))
+			hoods.append(Transform3D(Basis.IDENTITY, Vector3(x, y + 0.86, 3.10)))
+			mullions.append(Transform3D(Basis.IDENTITY, Vector3(x, y, 3.16)))
+			if floor_index > 0 and floor_index % 2 == 1 and column % 4 == 1:
+				balcony_decks.append(Transform3D(Basis.IDENTITY, Vector3(x, y - 1.00, 3.68)))
+				balcony_fronts.append(Transform3D(Basis.IDENTITY, Vector3(x, y - 0.47, 4.18)))
+				balcony_sides.append(Transform3D(Basis.IDENTITY, Vector3(x - 0.97, y - 0.47, 3.68)))
+				balcony_sides.append(Transform3D(Basis.IDENTITY, Vector3(x + 0.97, y - 0.47, 3.68)))
+				for post_index in range(7):
+					var post_x := x - 0.82 + float(post_index) * 0.273
+					balcony_posts.append(Transform3D(Basis.IDENTITY, Vector3(post_x, y - 0.80, 4.18)))
+	_multimesh_boxes(building, Vector3(1.48, 1.76, 0.14), frame, frames)
+	_multimesh_boxes(building, Vector3(1.28, 1.52, 0.055), dark_glass, dark_glass_transforms)
+	_multimesh_boxes(building, Vector3(1.28, 1.52, 0.055), lit_glass, lit_glass_transforms)
+	_multimesh_boxes(building, Vector3(1.56, 0.11, 0.30), sill, sills)
+	_multimesh_boxes(building, Vector3(1.52, 0.075, 0.22), frame, hoods)
+	_multimesh_boxes(building, Vector3(0.045, 1.48, 0.07), frame, mullions)
+	_multimesh_boxes(building, Vector3(2.04, 0.14, 1.08), concrete, balcony_decks)
+	_multimesh_boxes(building, Vector3(1.96, 0.075, 0.075), balcony_metal, balcony_fronts)
+	_multimesh_boxes(building, Vector3(0.075, 0.075, 0.94), balcony_metal, balcony_sides)
+	_multimesh_boxes(building, Vector3(0.045, 0.78, 0.045), balcony_metal, balcony_posts)
 	_box(building, Vector3(-width * 0.5 + 0.2, height * 0.5, 0.0), Vector3(0.35, height, 5.9), concrete)
 	_box(building, Vector3(width * 0.5 - 0.2, height * 0.5, 0.0), Vector3(0.35, height, 5.9), concrete)
-
 
 func _build_playground() -> void:
 	var metal := _material(Color(0.16, 0.22, 0.29), 0.58)
@@ -183,69 +275,101 @@ func _build_trees_and_benches() -> void:
 
 
 func _build_lamps() -> void:
-	var pole_material := _material(Color(0.12, 0.16, 0.22), 0.55)
-	var glow := _material(Color(1.0, 0.72, 0.42), 0.2, Color(1.0, 0.52, 0.20))
-	for point in [Vector3(-9.0, 0.0, 7.0), Vector3(9.0, 0.0, -3.0), Vector3(-9.0, 0.0, -18.0), Vector3(9.0, 0.0, -24.0)]:
+	var pole_material := _material(Color(0.10, 0.14, 0.20), 0.52)
+	var glow := _material(Color(1.0, 0.77, 0.52), 0.18, Color(1.0, 0.55, 0.24))
+	glow.emission_energy_multiplier = 2.8
+	var cone_material := StandardMaterial3D.new()
+	cone_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	cone_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	cone_material.albedo_color = Color(1.0, 0.66, 0.38, 0.035)
+	var lamp_points := [Vector3(-9.0, 0.0, 7.0), Vector3(9.0, 0.0, -3.0), Vector3(-9.0, 0.0, -18.0), Vector3(9.0, 0.0, -24.0)]
+	for lamp_index in range(lamp_points.size()):
+		var point: Vector3 = lamp_points[lamp_index]
 		_rod(self, point, point + Vector3(0.0, 6.2, 0.0), 0.085, pole_material)
 		_rod(self, point + Vector3(0.0, 6.0, 0.0), point + Vector3(0.9, 6.2, 0.0), 0.065, pole_material)
 		_sphere(self, point + Vector3(0.92, 6.05, 0.0), Vector3(0.19, 0.14, 0.19), glow)
-		var light := OmniLight3D.new()
+		var light := SpotLight3D.new()
 		light.position = point + Vector3(0.92, 5.9, 0.0)
-		light.light_color = Color(1.0, 0.68, 0.39)
-		light.light_energy = 1.15
-		light.omni_range = 11.0
-		light.shadow_enabled = false
+		light.rotation.x = -PI * 0.5
+		light.light_color = Color(1.0, 0.66, 0.38)
+		light.light_energy = 2.0
+		light.spot_range = 14.0
+		light.spot_angle = 42.0
+		light.shadow_enabled = lamp_index == 0
 		add_child(light)
-
+		if lamp_index == 0 or lamp_index == 2:
+			var cone := MeshInstance3D.new()
+			var cone_mesh := CylinderMesh.new()
+			cone_mesh.top_radius = 0.035
+			cone_mesh.bottom_radius = 1.45
+			cone_mesh.height = 5.2
+			cone_mesh.radial_segments = 18
+			cone.mesh = cone_mesh
+			cone.position = point + Vector3(0.92, 3.35, 0.0)
+			cone.material_override = cone_material
+			cone.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			add_child(cone)
 
 func _build_parked_car() -> void:
 	var car := Node3D.new()
 	car.position = Vector3(10.8, 0.0, 8.8)
 	car.rotation.y = -0.32
 	add_child(car)
-	var body := _material(Color(0.16, 0.21, 0.27), 0.48)
-	var glass := _material(Color(0.035, 0.065, 0.09), 0.22)
-	var tire := _material(Color(0.035, 0.04, 0.05))
-	var lamp := _material(Color(0.8, 0.65, 0.42), 0.25, Color(0.85, 0.42, 0.15))
+	var body := _material(Color(0.14, 0.19, 0.25), 0.42)
+	var glass := _material(Color(0.025, 0.052, 0.082), 0.20)
+	var tire := _material(Color(0.025, 0.032, 0.042), 0.94)
+	var chrome := _material(Color(0.34, 0.39, 0.44), 0.30)
+	var lamp := _material(Color(0.9, 0.72, 0.48), 0.22, Color(0.9, 0.42, 0.16))
+	var tail_lamp := _material(Color(0.55, 0.11, 0.09), 0.24, Color(0.8, 0.08, 0.04))
+	var snow_cap := _material(Color(0.68, 0.75, 0.84), 0.92)
 	_box(car, Vector3(0.0, 0.78, 0.0), Vector3(4.2, 1.0, 2.0), body)
 	_box(car, Vector3(-0.15, 1.48, 0.0), Vector3(2.45, 0.68, 1.72), body)
-	_box(car, Vector3(-0.15, 1.5, 0.9), Vector3(2.05, 0.48, 0.045), glass)
-	_box(car, Vector3(-0.15, 1.5, -0.9), Vector3(2.05, 0.48, 0.045), glass)
+	_box(car, Vector3(-0.15, 1.50, 0.90), Vector3(2.05, 0.48, 0.045), glass)
+	_box(car, Vector3(-0.15, 1.50, -0.90), Vector3(2.05, 0.48, 0.045), glass)
+	_box(car, Vector3(1.08, 1.49, 0.0), Vector3(0.055, 0.46, 1.50), glass)
+	_box(car, Vector3(-1.38, 1.49, 0.0), Vector3(0.055, 0.46, 1.50), glass)
+	_box(car, Vector3(-0.15, 1.87, 0.0), Vector3(2.62, 0.09, 1.86), snow_cap)
+	_box(car, Vector3(1.72, 1.28, 0.0), Vector3(0.50, 0.12, 1.80), snow_cap)
 	for x in [-1.32, 1.32]:
-		for z in [-0.93, 0.93]:
+		for z in [-0.97, 0.97]:
 			var wheel := _cylinder(car, Vector3(x, 0.43, z), 0.43, 0.24, tire)
-			wheel.rotation.z = PI * 0.5
+			wheel.rotation.x = PI * 0.5
+			var hub := _cylinder(car, Vector3(x, 0.43, z * 1.012), 0.20, 0.255, chrome)
+			hub.rotation.x = PI * 0.5
 	for z in [-0.74, 0.74]:
 		_box(car, Vector3(2.12, 0.84, z), Vector3(0.08, 0.22, 0.34), lamp)
-
+		_box(car, Vector3(-2.12, 0.84, z), Vector3(0.08, 0.22, 0.34), tail_lamp)
+		_box(car, Vector3(-0.15, 0.92, z * 1.05), Vector3(2.45, 0.055, 0.035), chrome)
 
 func _build_snowfall() -> void:
 	var flakes := CPUParticles3D.new()
 	flakes.name = "Snowfall"
-	flakes.amount = 320
-	flakes.lifetime = 9.0
+	flakes.amount = 460
+	flakes.lifetime = 9.5
 	flakes.preprocess = 4.0
 	flakes.emitting = true
 	flakes.position = Vector3(0.0, 12.0, -8.0)
 	flakes.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
-	flakes.emission_box_extents = Vector3(26.0, 8.0, 36.0)
-	flakes.direction = Vector3(-0.08, -1.0, -0.04)
-	flakes.spread = 12.0
-	flakes.gravity = Vector3(0.12, -0.8, 0.04)
-	flakes.initial_velocity_min = 0.35
-	flakes.initial_velocity_max = 1.0
-	flakes.scale_amount_min = 0.035
-	flakes.scale_amount_max = 0.09
-	flakes.mesh = QuadMesh.new()
-	flakes.visibility_aabb = AABB(Vector3(-30.0, -16.0, -44.0), Vector3(60.0, 34.0, 72.0))
+	flakes.emission_box_extents = Vector3(28.0, 8.0, 38.0)
+	flakes.direction = Vector3(-0.10, -1.0, -0.035)
+	flakes.spread = 13.0
+	flakes.gravity = Vector3(0.18, -0.95, 0.04)
+	flakes.initial_velocity_min = 0.42
+	flakes.initial_velocity_max = 1.25
+	flakes.scale_amount_min = 0.045
+	flakes.scale_amount_max = 0.12
+	var flake_mesh := QuadMesh.new()
+	flake_mesh.size = Vector2(0.10, 0.10)
+	flakes.mesh = flake_mesh
+	flakes.visibility_aabb = AABB(Vector3(-32.0, -16.0, -46.0), Vector3(64.0, 36.0, 76.0))
 	var flake_material := StandardMaterial3D.new()
 	flake_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	flake_material.albedo_color = Color(0.82, 0.9, 1.0, 0.78)
+	flake_material.albedo_color = Color(0.88, 0.94, 1.0, 0.82)
 	flake_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	flake_material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	flake_material.roughness = 1.0
 	flakes.material_override = flake_material
 	add_child(flakes)
-
 
 func _build_player() -> void:
 	player = CharacterBody3D.new()
@@ -306,6 +430,23 @@ func _build_hud() -> void:
 	layer.add_child(controls)
 	controls.connect("movement_changed", Callable(player, "set_mobile_move"))
 	controls.connect("look_delta", Callable(player, "add_mobile_look"))
+
+
+func _multimesh_boxes(parent: Node3D, box_size: Vector3, material: Material, transforms: Array[Transform3D]) -> void:
+	if transforms.is_empty():
+		return
+	var box_mesh := BoxMesh.new()
+	box_mesh.size = box_size
+	var multi := MultiMesh.new()
+	multi.transform_format = MultiMesh.TRANSFORM_3D
+	multi.mesh = box_mesh
+	multi.instance_count = transforms.size()
+	for instance_index in range(transforms.size()):
+		multi.set_instance_transform(instance_index, transforms[instance_index])
+	var instance := MultiMeshInstance3D.new()
+	instance.multimesh = multi
+	instance.material_override = material
+	parent.add_child(instance)
 
 
 func _box(parent: Node3D, position: Vector3, size: Vector3, material: Material, with_collision: bool = false) -> Node3D:

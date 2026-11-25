@@ -314,35 +314,9 @@ func _build_lamps() -> void:
 			add_child(cone)
 
 func _build_parked_car() -> void:
-	var car := Node3D.new()
-	car.position = Vector3(10.8, 0.0, 8.8)
-	car.rotation.y = -0.32
-	add_child(car)
-	var body := _material(Color(0.14, 0.19, 0.25), 0.42)
-	var glass := _material(Color(0.025, 0.052, 0.082), 0.20)
-	var tire := _material(Color(0.025, 0.032, 0.042), 0.94)
-	var chrome := _material(Color(0.34, 0.39, 0.44), 0.30)
-	var lamp := _material(Color(0.9, 0.72, 0.48), 0.22, Color(0.9, 0.42, 0.16))
-	var tail_lamp := _material(Color(0.55, 0.11, 0.09), 0.24, Color(0.8, 0.08, 0.04))
-	var snow_cap := _material(Color(0.68, 0.75, 0.84), 0.92)
-	_box(car, Vector3(0.0, 0.78, 0.0), Vector3(4.2, 1.0, 2.0), body)
-	_box(car, Vector3(-0.15, 1.48, 0.0), Vector3(2.45, 0.68, 1.72), body)
-	_box(car, Vector3(-0.15, 1.50, 0.90), Vector3(2.05, 0.48, 0.045), glass)
-	_box(car, Vector3(-0.15, 1.50, -0.90), Vector3(2.05, 0.48, 0.045), glass)
-	_box(car, Vector3(1.08, 1.49, 0.0), Vector3(0.055, 0.46, 1.50), glass)
-	_box(car, Vector3(-1.38, 1.49, 0.0), Vector3(0.055, 0.46, 1.50), glass)
-	_box(car, Vector3(-0.15, 1.87, 0.0), Vector3(2.62, 0.09, 1.86), snow_cap)
-	_box(car, Vector3(1.72, 1.28, 0.0), Vector3(0.50, 0.12, 1.80), snow_cap)
-	for x in [-1.32, 1.32]:
-		for z in [-0.97, 0.97]:
-			var wheel := _cylinder(car, Vector3(x, 0.43, z), 0.43, 0.24, tire)
-			wheel.rotation.x = PI * 0.5
-			var hub := _cylinder(car, Vector3(x, 0.43, z * 1.012), 0.20, 0.255, chrome)
-			hub.rotation.x = PI * 0.5
-	for z in [-0.74, 0.74]:
-		_box(car, Vector3(2.12, 0.84, z), Vector3(0.08, 0.22, 0.34), lamp)
-		_box(car, Vector3(-2.12, 0.84, z), Vector3(0.08, 0.22, 0.34), tail_lamp)
-		_box(car, Vector3(-0.15, 0.92, z * 1.05), Vector3(2.45, 0.055, 0.035), chrome)
+	var vehicle_script: Script = load("res://vehicle_visuals.gd")
+	var vehicle_visuals: RefCounted = vehicle_script.new()
+	vehicle_visuals.call("build", self)
 
 func _build_snowfall() -> void:
 	var flakes := CPUParticles3D.new()

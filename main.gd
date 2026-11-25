@@ -107,22 +107,31 @@ func _build_ground() -> void:
 	snow.set_shader_parameter("snow_color", Color(0.53, 0.61, 0.72))
 	snow.set_shader_parameter("ice_color", Color(0.20, 0.28, 0.40))
 	snow.set_shader_parameter("ice_amount", 0.18)
+
+	# Packed winter road: asphalt aggregate, thin drifting snow and polished ice.
 	var packed_snow := ShaderMaterial.new()
-	packed_snow.shader = load("res://materials/snow_ground.gdshader")
-	packed_snow.set_shader_parameter("snow_color", Color(0.22, 0.29, 0.39))
-	packed_snow.set_shader_parameter("ice_color", Color(0.12, 0.19, 0.29))
-	packed_snow.set_shader_parameter("ice_amount", 0.68)
+	packed_snow.shader = load("res://materials/asphalt_snow.gdshader")
+	packed_snow.set_shader_parameter("asphalt_color", Color(0.105, 0.135, 0.18))
+	packed_snow.set_shader_parameter("snow_color", Color(0.35, 0.42, 0.54))
+	packed_snow.set_shader_parameter("ice_color", Color(0.12, 0.19, 0.30))
+	packed_snow.set_shader_parameter("snow_coverage", 0.30)
+	packed_snow.set_shader_parameter("wetness", 0.34)
+	packed_snow.set_shader_parameter("normal_strength", 0.82)
+
 	_box(self, Vector3(0.0, -0.24, -8.0), Vector3(100.0, 0.48, 100.0), snow, true)
 	_box(self, Vector3(0.0, 0.015, 6.0), Vector3(3.4, 0.035, 45.0), packed_snow)
 	_box(self, Vector3(-7.0, 0.015, -9.0), Vector3(1.2, 0.035, 30.0), packed_snow)
 	_box(self, Vector3(7.0, 0.015, -9.0), Vector3(1.2, 0.035, 30.0), packed_snow)
+
 	var drift_material := _material(Color(0.68, 0.75, 0.84), 0.96)
 	for i in range(48):
 		var x := rng.randf_range(-19.0, 19.0)
 		var z := rng.randf_range(-31.0, 19.0)
 		var mound := _sphere(self, Vector3(x, 0.10, z), Vector3(rng.randf_range(0.45, 1.85), rng.randf_range(0.12, 0.38), rng.randf_range(0.45, 1.35)), drift_material)
 		mound.rotation.y = rng.randf_range(0.0, TAU)
-	var print_material := _material(Color(0.28, 0.36, 0.48), 0.88)
+
+	# A dark salted-snow strip marks the pedestrian route.
+	var print_material := _material(Color(0.24, 0.32, 0.44), 0.88)
 	for step_index in range(42):
 		var z := 13.0 - float(step_index) * 0.72
 		var side := -1.0 if step_index % 2 == 0 else 1.0

@@ -2,7 +2,6 @@ extends Node3D
 
 var rng := RandomNumberGenerator.new()
 var player: CharacterBody3D
-var window_materials: Array[StandardMaterial3D] = []
 
 
 func _ready() -> void:
@@ -87,7 +86,6 @@ func _build_building(origin: Vector3, angle: float, width: float, floors: int) -
 	var concrete := _material(Color(0.42, 0.45, 0.49))
 	var dark_glass := _material(Color(0.035, 0.065, 0.11), 0.28)
 	var lit_glass := _material(Color(0.85, 0.59, 0.28), 0.3, Color(1.0, 0.43, 0.12))
-	var frame := _material(Color(0.12, 0.15, 0.19))
 	var height := 2.55 * float(floors)
 	_box(building, Vector3(0.0, height * 0.5, 0.0), Vector3(width, height, 5.7), wall)
 	_box(building, Vector3(0.0, height + 0.18, 0.0), Vector3(width + 0.6, 0.36, 6.1), concrete)
@@ -296,7 +294,8 @@ func _build_hud() -> void:
 
 	var hint := Label.new()
 	hint.position = Vector2(24.0, 92.0)
-	hint.text = "WASD — идти   •   мышь — смотреть"
+	var mobile_mode := OS.has_feature("android") or OS.has_feature("ios")
+	hint.text = "Стик слева — идти   •   свайп справа — смотреть" if mobile_mode else "Нажми ЛКМ, затем WASD + мышь"
 	hint.add_theme_font_size_override("font_size", 13)
 	hint.add_theme_color_override("font_color", Color(0.70, 0.78, 0.88, 0.58))
 	layer.add_child(hint)

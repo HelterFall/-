@@ -101,12 +101,7 @@ func _build_building(origin: Vector3, angle: float, width: float, floors: int) -
 			var x := -width * 0.5 + 1.25 + float(column) * (width - 2.5) / maxf(1.0, float(columns - 1))
 			var is_lit := rng.randf() < 0.22
 			var glass := lit_glass if is_lit else dark_glass
-			_box(building, Vector3(x, y, 2.91), Vector3(1.28, 1.58, 0.13), frame)
-			_box(building, Vector3(x, y + 0.02, 3.00), Vector3(1.07, 1.36, 0.055), glass)
-			_box(building, Vector3(x, y, 3.06), Vector3(0.045, 1.39, 0.035), frame)
-			_box(building, Vector3(x, y - 0.73, 3.08), Vector3(1.15, 0.055, 0.08), concrete)
-			if column % 4 == 0 and floor_index > 0:
-				_box(building, Vector3(x, y - 0.91, 3.32), Vector3(1.65, 0.10, 0.85), side_wall)
+			_box(building, Vector3(x, y, 2.99), Vector3(1.30, 1.54, 0.09), glass)
 
 	_box(building, Vector3(-width * 0.5 + 0.2, height * 0.5, 0.0), Vector3(0.35, height, 5.9), concrete)
 	_box(building, Vector3(width * 0.5 - 0.2, height * 0.5, 0.0), Vector3(0.35, height, 5.9), concrete)
@@ -229,7 +224,7 @@ func _build_parked_car() -> void:
 func _build_snowfall() -> void:
 	var flakes := CPUParticles3D.new()
 	flakes.name = "Snowfall"
-	flakes.amount = 520
+	flakes.amount = 320
 	flakes.lifetime = 9.0
 	flakes.preprocess = 4.0
 	flakes.emitting = true
@@ -244,6 +239,7 @@ func _build_snowfall() -> void:
 	flakes.scale_amount_min = 0.035
 	flakes.scale_amount_max = 0.09
 	flakes.mesh = QuadMesh.new()
+	flakes.visibility_aabb = AABB(Vector3(-30.0, -16.0, -44.0), Vector3(60.0, 34.0, 72.0))
 	var flake_material := StandardMaterial3D.new()
 	flake_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	flake_material.albedo_color = Color(0.82, 0.9, 1.0, 0.78)
@@ -308,8 +304,8 @@ func _build_hud() -> void:
 	controls.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	controls.set_script(load("res://mobile_controls.gd"))
 	layer.add_child(controls)
-	controls.movement_changed.connect(Callable(player, "set_mobile_move"))
-	controls.look_delta.connect(Callable(player, "add_mobile_look"))
+	controls.connect("movement_changed", Callable(player, "set_mobile_move"))
+	controls.connect("look_delta", Callable(player, "add_mobile_look"))
 
 
 func _box(parent: Node3D, position: Vector3, size: Vector3, material: Material, with_collision: bool = false) -> Node3D:

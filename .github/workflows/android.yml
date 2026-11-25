@@ -65,6 +65,16 @@ jobs:
       - name: Import project assets
         run: godot --headless --editor --path . --quit
 
+      - name: Headless runtime smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          godot --headless --path . --quit-after 6 2>&1 | tee /tmp/godot-smoke.log
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" /tmp/godot-smoke.log; then
+            echo "Godot runtime smoke test reported a script error."
+            exit 1
+          fi
+
       - name: Export APK
         run: |
           mkdir -p build

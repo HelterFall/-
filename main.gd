@@ -272,7 +272,7 @@ func _build_player() -> void:
 	camera.position = Vector3(0.0, 1.62, 0.0)
 	camera.fov = 78.0
 	player.add_child(camera)
-	player.camera = camera
+	player.set("camera", camera)
 
 
 func _build_hud() -> void:
@@ -308,8 +308,8 @@ func _build_hud() -> void:
 	controls.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	controls.set_script(load("res://mobile_controls.gd"))
 	layer.add_child(controls)
-	controls.movement_changed.connect(player.set_mobile_move)
-	controls.look_delta.connect(player.add_mobile_look)
+	controls.movement_changed.connect(Callable(player, "set_mobile_move"))
+	controls.look_delta.connect(Callable(player, "add_mobile_look"))
 
 
 func _box(parent: Node3D, position: Vector3, size: Vector3, material: Material, with_collision: bool = false) -> Node3D:
@@ -367,8 +367,7 @@ func _rod(parent: Node3D, start: Vector3, finish: Vector3, radius: float, materi
 	mesh.height = difference.length()
 	mesh.radial_segments = 10
 	instance.mesh = mesh
-	instance.position = (start + finish) * 0.5
-	instance.basis = Basis(Quaternion(Vector3.UP, difference.normalized()))
+	instance.transform = Transform3D(Basis(Quaternion(Vector3.UP, difference.normalized())), (start + finish) * 0.5)
 	instance.material_override = material
 	parent.add_child(instance)
 	return instance

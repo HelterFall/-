@@ -82,7 +82,7 @@ func _build_windows(parent: Node3D, material: Material) -> void:
 	var tool := SurfaceTool.new()
 	tool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for side in [-1.0, 1.0]:
-		var z := side * 0.755
+		var z: float = float(side) * 0.755
 		# Rear side window.
 		_add_quad(tool,
 			Vector3(-1.28, 1.23, z), Vector3(-0.98, 1.68, z * 0.96),

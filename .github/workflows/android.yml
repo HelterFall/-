@@ -29,7 +29,7 @@ jobs:
       - name: Install Android packages
         run: |
           yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.1" "ndk;28.1.13356709" "cmake;3.22.1"
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.1" "ndk;28.1.13356709" "cmake;3.10.2.4988404"
 
       - name: Download Godot 4.7 and Android export templates
         shell: bash
@@ -50,9 +50,9 @@ jobs:
         shell: bash
         run: |
           mkdir -p "$HOME/.android"
-          keytool -genkeypair -v             -keystore "$HOME/.android/debug.keystore"             -storepass android             -alias androiddebugkey             -keypass android             -dname "CN=Android Debug,O=Android,C=US"             -keyalg RSA -keysize 2048 -validity 10000
+          keytool -genkeypair -noprompt -v             -keystore "$HOME/.android/debug.keystore"             -storepass android             -alias androiddebugkey             -keypass android             -dname "CN=Android Debug,O=Android,C=US"             -keyalg RSA -keysize 2048 -validity 10000
           mkdir -p "$HOME/.config/godot"
-          cat > "$HOME/.config/godot/editor_settings-4.tres" <<EOF
+          cat > "$HOME/.config/godot/editor_settings-4.7.tres" <<EOF
           [gd_resource type="EditorSettings" format=3]
 
           [resource]

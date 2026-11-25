@@ -10,6 +10,8 @@ func _ready() -> void:
 	_build_ground()
 	_build_buildings()
 	_build_playground()
+	var yard_visuals = load("res://yard_visuals.gd").new()
+	yard_visuals.build(self)
 	_build_trees_and_benches()
 	_build_lamps()
 	_build_parked_car()

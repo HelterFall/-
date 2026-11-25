@@ -110,6 +110,7 @@ func _build_windows(parent: Node3D, material: Material) -> void:
 
 
 func _build_wheels(parent: Node3D, tire: Material, rim: Material, chrome: Material) -> void:
+	var tread_transforms: Array[Transform3D] = []
 	for x in [-1.34, 1.34]:
 		for side in [-1.0, 1.0]:
 			var wheel := _cylinder(parent, Vector3(x, 0.47, side * 0.91), 0.43, 0.25, tire, 28)
@@ -123,12 +124,24 @@ func _build_wheels(parent: Node3D, tire: Material, rim: Material, chrome: Materi
 				var spoke_start := Vector3(x + cos(angle) * 0.075, 0.47 + sin(angle) * 0.075, side * 1.078)
 				var spoke_end := Vector3(x + cos(angle) * 0.235, 0.47 + sin(angle) * 0.235, side * 1.078)
 				_rod(parent, spoke_start, spoke_end, 0.018, chrome)
-			# A handful of chunky winter-tire blocks read as tread at close range.
+			# Batch the chunky winter-tire tread blocks into a single draw call.
 			for tread in range(16):
 				var tread_angle := float(tread) * TAU / 16.0
 				var tread_pos := Vector3(x + cos(tread_angle) * 0.426, 0.47 + sin(tread_angle) * 0.426, side * 0.91)
-				var block := _box(parent, tread_pos, Vector3(0.12, 0.045, 0.265), _material(Color(0.035, 0.042, 0.052), 0.92))
-				block.rotation.z = tread_angle
+				var tread_basis := Basis(Vector3(0.0, 0.0, 1.0), tread_angle)
+				tread_transforms.append(Transform3D(tread_basis, tread_pos))
+	var tread_mesh := BoxMesh.new()
+	tread_mesh.size = Vector3(0.12, 0.045, 0.265)
+	var tread_multi := MultiMesh.new()
+	tread_multi.transform_format = MultiMesh.TRANSFORM_3D
+	tread_multi.mesh = tread_mesh
+	tread_multi.instance_count = tread_transforms.size()
+	for tread_index in range(tread_transforms.size()):
+		tread_multi.set_instance_transform(tread_index, tread_transforms[tread_index])
+	var tread_instance := MultiMeshInstance3D.new()
+	tread_instance.multimesh = tread_multi
+	tread_instance.material_override = tire
+	parent.add_child(tread_instance)
 
 
 func _build_trim(parent: Node3D, rubber: Material, chrome: Material, headlamp: Material, tail_lamp: Material) -> void:
@@ -243,4 +256,5 @@ func _car_paint(color: Color) -> StandardMaterial3D:
 	result.clearcoat_enabled = true
 	result.clearcoat = 0.64
 	result.clearcoat_roughness = 0.18
+	result.cull_mode = BaseMaterial3D.CULL_DISABLED
 	return result

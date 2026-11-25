@@ -8,6 +8,9 @@ config/name="ДВОР"
 config/description="Тихий зимний двор ночью"
 run/main_scene="res://main.tscn"
 
+[autoload]
+FilmOverlay="*res://film_overlay.gd"
+
 [display]
 window/size/viewport_width=1280
 window/size/viewport_height=720

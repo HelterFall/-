@@ -56,7 +56,7 @@ func _input(event: InputEvent) -> void:
 func _update_joystick(touch_position: Vector2) -> void:
 	var offset: Vector2 = (touch_position - _joystick_center).limit_length(JOYSTICK_RADIUS)
 	_joystick_position = _joystick_center + offset
-	movement_changed.emit(Vector2(offset.x / JOYSTICK_RADIUS, -offset.y / JOYSTICK_RADIUS))
+	movement_changed.emit(Vector2(offset.x / JOYSTICK_RADIUS, offset.y / JOYSTICK_RADIUS))
 
 
 func _draw() -> void:

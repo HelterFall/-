@@ -267,6 +267,7 @@ func _build_player() -> void:
 	var camera := Camera3D.new()
 	camera.position = Vector3(0.0, 1.62, 0.0)
 	camera.fov = 78.0
+	camera.current = true
 	player.add_child(camera)
 	player.set("camera", camera)
 

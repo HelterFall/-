@@ -168,8 +168,8 @@ func _build_trees_and_benches() -> void:
 			var y := rng.randf_range(1.5, height - 0.3)
 			var sign_x := -1.0 if branch_index % 2 == 0 else 1.0
 			var length := rng.randf_range(1.0, 2.3)
-			var start := base + Vector3(0.0, y, 0.0)
-			var finish := start + Vector3(sign_x * length, rng.randf_range(0.45, 1.25), rng.randf_range(-0.65, 0.65))
+			var start: Vector3 = base + Vector3(0.0, y, 0.0)
+			var finish: Vector3 = start + Vector3(sign_x * length, rng.randf_range(0.45, 1.25), rng.randf_range(-0.65, 0.65))
 			_rod(self, start, finish, 0.055, branch)
 			if branch_index % 2 == 0:
 				_sphere(self, finish, Vector3(0.22, 0.12, 0.22), snow)

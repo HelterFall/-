@@ -5,6 +5,10 @@ var player: CharacterBody3D
 
 
 func _ready() -> void:
+	call_deferred("_build_world")
+
+
+func _build_world() -> void:
 	rng.randomize()
 	_build_world_environment()
 	_build_ground()

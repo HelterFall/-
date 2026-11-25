@@ -109,18 +109,25 @@ func _build_air_conditioners(root: Node3D, origin: Vector3, yaw: float, width: f
 func _build_playground_fence(root: Node3D) -> void:
 	var paint := _weathered_metal(Color(0.15, 0.20, 0.26), 0.74, 0.28, 0.48)
 	var snow := _material(Color(0.63, 0.70, 0.79), 0.92)
+	var side_posts: Array[Transform3D] = []
+	var back_posts: Array[Transform3D] = []
+	var side_rails: Array[Transform3D] = []
+	var back_rails: Array[Transform3D] = []
 	for x in [-8.0, 8.0]:
 		for segment in range(6):
 			var z := -10.4 - float(segment) * 1.42
-			_rod(root, Vector3(x, 0.10, z), Vector3(x, 1.02, z), 0.052, paint)
-		_rod(root, Vector3(x, 1.02, -10.4), Vector3(x, 1.02, -17.5), 0.052, paint)
-		_rod(root, Vector3(x, 0.48, -10.4), Vector3(x, 0.48, -17.5), 0.034, paint)
-	_rod(root, Vector3(-8.0, 1.02, -17.5), Vector3(8.0, 1.02, -17.5), 0.052, paint)
-	_rod(root, Vector3(-8.0, 0.48, -17.5), Vector3(8.0, 0.48, -17.5), 0.034, paint)
+			side_posts.append(Transform3D(Basis.IDENTITY, Vector3(x, 0.56, z)))
+		for rail_y in [0.48, 1.02]:
+			side_rails.append(Transform3D(Basis.IDENTITY, Vector3(x, rail_y, -13.95)))
 	for x in range(-7, 8):
-		_rod(root, Vector3(float(x), 0.10, -17.5), Vector3(float(x), 1.02, -17.5), 0.040, paint)
+		back_posts.append(Transform3D(Basis.IDENTITY, Vector3(float(x), 0.56, -17.5)))
+	for rail_y in [0.48, 1.02]:
+		back_rails.append(Transform3D(Basis.IDENTITY, Vector3(0.0, rail_y, -17.5)))
+	_multimesh_boxes(root, Vector3(0.105, 0.92, 0.105), paint, side_posts)
+	_multimesh_boxes(root, Vector3(0.095, 0.92, 0.095), paint, back_posts)
+	_multimesh_boxes(root, Vector3(0.075, 0.08, 7.10), paint, side_rails)
+	_multimesh_boxes(root, Vector3(16.0, 0.08, 0.075), paint, back_rails)
 	_box(root, Vector3(0.0, 1.08, -17.5), Vector3(16.2, 0.075, 0.13), snow)
-
 
 func _build_trash_container(root: Node3D, origin: Vector3, yaw: float) -> void:
 	var container := Node3D.new()

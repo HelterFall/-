@@ -36,7 +36,7 @@ func _build_stairwell(root: Node3D, tile_shader: Shader) -> void:
 
 	# The two tiled sides form a deep rectangular shaft behind the rear apartment block.
 	for side in [-1.0, 1.0]:
-		var wall_center := Vector3(side * 3.15, STAIR_WALL_CENTER_Y, STAIR_WALL_CENTER_Z)
+		var wall_center := Vector3(float(side) * 3.15, STAIR_WALL_CENTER_Y, STAIR_WALL_CENTER_Z)
 		_solid_box(root, wall_center, side_size, concrete)
 		var inner_x: float = float(side) * 2.90
 		var yaw: float = PI * 0.5 if float(side) < 0.0 else -PI * 0.5
@@ -51,7 +51,7 @@ func _build_stairwell(root: Node3D, tile_shader: Shader) -> void:
 		)
 		_solid_box(
 			root,
-			Vector3(side * 3.15, 0.18, -37.55),
+			Vector3(float(side) * 3.15, 0.18, -37.55),
 			Vector3(0.5, 0.42, 1.0),
 			edge_concrete
 		)
@@ -131,8 +131,7 @@ func _build_chamber(root: Node3D, tile_shader: Shader) -> void:
 	var backing := _material(Color(0.23, 0.25, 0.27), 0.96)
 	var room_center_y: float = (ROOM_FLOOR_Y + ROOM_CEILING_Y) * 0.5
 	var half_width: float = ROOM_WIDTH * 0.5
-	var half_depth: float = ROOM_DEPTH * 0.5
-	var wall_center_x: float = half_width - WALL_THICKNESS * 0.5
+		var wall_center_x: float = half_width - WALL_THICKNESS * 0.5
 	var wall_center_z: float = ROOM_CENTER_Z
 
 	# A single large, walkable chamber with a continuous tiled floor and ceiling.
@@ -175,7 +174,7 @@ func _build_chamber(root: Node3D, tile_shader: Shader) -> void:
 			backing
 		)
 		var inner_x: float = float(side) * (half_width - WALL_THICKNESS)
-		var yaw := PI * 0.5 if side < 0.0 else -PI * 0.5
+		var yaw: float = PI * 0.5 if float(side) < 0.0 else -PI * 0.5
 		var side_basis := Basis(Vector3.UP, yaw) * Basis(Vector3.RIGHT, PI * 0.5)
 		_tile_plane(
 			root,
@@ -287,7 +286,7 @@ func _build_lighting(root: Node3D) -> void:
 		var lamp_mesh := BoxMesh.new()
 		lamp_mesh.size = Vector3(0.20, 0.18, 0.42)
 		lamp.mesh = lamp_mesh
-		lamp.position = Vector3(side * 2.88, -0.10, -38.4)
+		lamp.position = Vector3(float(side) * 2.88, -0.10, -38.4)
 		lamp.material_override = amber
 		root.add_child(lamp)
 		var glow := OmniLight3D.new()

@@ -44,7 +44,7 @@ func _build_stairwell(root: Node3D, tile_shader: Shader) -> void:
 		var wall_material := _tile_material(tile_shader, 22.0, 8.0, 0.58, 0.62)
 		_tile_plane(
 			root,
-			Vector3(inner_x, STAIR_WALL_CENTER_Y, STAIR_WALL_CENTER_Z),
+			Vector3(inner_x - float(side) * 0.008, STAIR_WALL_CENTER_Y, STAIR_WALL_CENTER_Z),
 			wall_basis,
 			Vector2(STAIR_WALL_LENGTH, STAIR_WALL_HEIGHT),
 			wall_material
@@ -73,7 +73,7 @@ func _build_stairwell(root: Node3D, tile_shader: Shader) -> void:
 	ramp_body.add_child(ramp_collision)
 	root.add_child(ramp_body)
 
-	var tread_material := _tile_material(tile_shader, 5.0, 1.0, 0.52, 0.48)
+	var tread_material := _tile_material(tile_shader, 10.0, 1.0, 0.52, 0.48)
 	var riser_material := _tile_material(tile_shader, 5.0, 1.0, 0.60, 0.66)
 	var step_block := _material(Color(0.30, 0.32, 0.33), 0.95)
 	for step_index in range(step_count):
@@ -93,7 +93,7 @@ func _build_stairwell(root: Node3D, tile_shader: Shader) -> void:
 			tread_material
 		)
 		if step_index > 0:
-			var riser_z: float = z + STAIR_DEPTH * 0.5
+			var riser_z: float = z + STAIR_DEPTH * 0.5 + 0.006
 			var riser_basis := Basis(Vector3.RIGHT, PI * 0.5)
 			_tile_plane(
 				root,
@@ -184,7 +184,7 @@ func _build_chamber(root: Node3D, tile_shader: Shader) -> void:
 		var side_basis := Basis(Vector3.UP, yaw) * Basis(Vector3.RIGHT, PI * 0.5)
 		_tile_plane(
 			root,
-			Vector3(inner_x, room_center_y, wall_center_z),
+			Vector3(inner_x - float(side) * 0.008, room_center_y, wall_center_z),
 			side_basis,
 			Vector2(ROOM_DEPTH - 0.04, ROOM_HEIGHT),
 			_tile_material(tile_shader, 27.0, 7.0, 0.66, 0.64)
@@ -199,7 +199,7 @@ func _build_chamber(root: Node3D, tile_shader: Shader) -> void:
 	)
 	_tile_plane(
 		root,
-		Vector3(0.0, room_center_y, ROOM_BACK_Z),
+		Vector3(0.0, room_center_y, ROOM_BACK_Z + 0.008),
 		Basis(Vector3.UP, PI) * Basis(Vector3.RIGHT, PI * 0.5),
 		Vector2(ROOM_WIDTH, ROOM_HEIGHT),
 		_tile_material(tile_shader, 35.0, 7.0, 0.70, 0.66)
@@ -216,7 +216,7 @@ func _build_chamber(root: Node3D, tile_shader: Shader) -> void:
 		_solid_box(root, wall_center, wall_size, backing)
 		_tile_plane(
 			root,
-			Vector3(float(side) * side_segment_x, room_center_y, ROOM_FRONT_Z),
+			Vector3(float(side) * side_segment_x, room_center_y, ROOM_FRONT_Z - 0.008),
 			Basis(Vector3.RIGHT, PI * 0.5),
 			Vector2(side_segment_width, ROOM_HEIGHT),
 			_tile_material(tile_shader, 15.0, 7.0, 0.66, 0.62)
@@ -233,7 +233,7 @@ func _build_chamber(root: Node3D, tile_shader: Shader) -> void:
 	)
 	_tile_plane(
 		root,
-		Vector3(0.0, lintel_center_y, ROOM_FRONT_Z),
+		Vector3(0.0, lintel_center_y, ROOM_FRONT_Z - 0.008),
 		Basis(Vector3.RIGHT, PI * 0.5),
 		Vector2(doorway_width, lintel_height),
 		_tile_material(tile_shader, 5.0, 3.0, 0.60, 0.64)
@@ -252,7 +252,7 @@ func _build_chamber(root: Node3D, tile_shader: Shader) -> void:
 			# Front face of each pier catches the cold ceiling light.
 			_tile_plane(
 				root,
-				Vector3(pier_x, pier_y, pier_z + 0.416),
+				Vector3(pier_x, pier_y, pier_z + 0.418),
 				Basis(Vector3.RIGHT, PI * 0.5),
 				Vector2(0.82, pier_height),
 				pier_material
@@ -270,15 +270,15 @@ func _build_lighting(root: Node3D) -> void:
 		var fixture_mesh := BoxMesh.new()
 		fixture_mesh.size = Vector3(2.4, 0.10, 0.42)
 		fixture.mesh = fixture_mesh
-		fixture.position = Vector3(0.0, ROOM_CEILING_Y + 0.12, z)
+		fixture.position = Vector3(0.0, ROOM_CEILING_Y - 0.13, z)
 		fixture.material_override = fixture_material
 		root.add_child(fixture)
 
 		var light := OmniLight3D.new()
-		light.position = Vector3(0.0, ROOM_CEILING_Y + 1.5, z)
+		light.position = Vector3(0.0, ROOM_CEILING_Y - 1.5, z)
 		light.light_color = Color(0.69, 0.79, 0.91)
-		light.light_energy = 1.75
-		light.omni_range = 13.0
+		light.light_energy = 2.1
+		light.omni_range = 24.0
 		light.shadow_enabled = lamp_index == 1
 		root.add_child(light)
 

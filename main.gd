@@ -280,29 +280,16 @@ func _build_playground() -> void:
 
 
 func _build_trees_and_benches() -> void:
-	var bark := _material(Color(0.19, 0.22, 0.27))
-	var branch := _material(Color(0.24, 0.28, 0.34))
-	var snow := _material(Color(0.69, 0.75, 0.82))
 	var bench_wood := _material(Color(0.25, 0.22, 0.21))
 	var bench_metal := _material(Color(0.13, 0.17, 0.22))
-
 	var tree_positions := [
 		Vector3(-10.8, 0.0, -3.0), Vector3(-12.2, 0.0, -15.0),
 		Vector3(11.0, 0.0, -4.0), Vector3(12.0, 0.0, -19.0),
 		Vector3(-8.8, 0.0, -25.0), Vector3(8.8, 0.0, -27.0)
 	]
-	for base in tree_positions:
-		var height := rng.randf_range(4.2, 6.0)
-		_rod(self, base + Vector3(0.0, 0.0, 0.0), base + Vector3(0.0, height, 0.0), 0.18, bark)
-		for branch_index in range(7):
-			var y := rng.randf_range(1.5, height - 0.3)
-			var sign_x := -1.0 if branch_index % 2 == 0 else 1.0
-			var length := rng.randf_range(1.0, 2.3)
-			var start: Vector3 = base + Vector3(0.0, y, 0.0)
-			var finish: Vector3 = start + Vector3(sign_x * length, rng.randf_range(0.45, 1.25), rng.randf_range(-0.65, 0.65))
-			_rod(self, start, finish, 0.055, branch)
-			if branch_index % 2 == 0:
-				_sphere(self, finish, Vector3(0.22, 0.12, 0.22), snow)
+	var tree_script: Script = load("res://winter_trees.gd")
+	var tree_visuals: RefCounted = tree_script.new()
+	tree_visuals.call("build", self, tree_positions, rng)
 
 	for z in [-1.5, -18.0]:
 		_box(self, Vector3(-8.2, 0.62, z), Vector3(2.6, 0.18, 0.65), bench_wood)

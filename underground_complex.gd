@@ -38,8 +38,8 @@ func _build_stairwell(root: Node3D, tile_shader: Shader) -> void:
 	for side in [-1.0, 1.0]:
 		var wall_center := Vector3(side * 3.15, STAIR_WALL_CENTER_Y, STAIR_WALL_CENTER_Z)
 		_solid_box(root, wall_center, side_size, concrete)
-		var inner_x := side * 2.90
-		var yaw := PI * 0.5 if side < 0.0 else -PI * 0.5
+		var inner_x: float = float(side) * 2.90
+		var yaw: float = PI * 0.5 if float(side) < 0.0 else -PI * 0.5
 		var wall_basis := Basis(Vector3.UP, yaw) * Basis(Vector3.RIGHT, PI * 0.5)
 		var wall_material := _tile_material(tile_shader, 22.0, 8.0, 0.58, 0.62)
 		_tile_plane(
@@ -85,6 +85,25 @@ func _build_stairwell(root: Node3D, tile_shader: Shader) -> void:
 				Vector2(STAIR_WIDTH - 0.06, STAIR_RISE + 0.015),
 				riser_material
 			)
+		if step_index > 1 and step_index % 7 == 0:
+			var lamp_side: float = -1.0 if int(step_index / 7) % 2 == 0 else 1.0
+			var sconce_material := _material(Color(0.64, 0.68, 0.68), 0.42)
+			sconce_material.emission_enabled = true
+			sconce_material.emission = Color(0.50, 0.67, 0.82)
+			sconce_material.emission_energy_multiplier = 0.9
+			var sconce := MeshInstance3D.new()
+			var sconce_mesh := BoxMesh.new()
+			sconce_mesh.size = Vector3(0.16, 0.38, 0.48)
+			sconce.mesh = sconce_mesh
+			sconce.position = Vector3(lamp_side * 2.76, level_y + 2.45, z)
+			sconce.material_override = sconce_material
+			root.add_child(sconce)
+			var stair_light := OmniLight3D.new()
+			stair_light.position = sconce.position + Vector3(-lamp_side * 0.22, -0.18, 0.0)
+			stair_light.light_color = Color(0.58, 0.73, 0.88)
+			stair_light.light_energy = 0.72
+			stair_light.omni_range = 5.0
+			root.add_child(stair_light)
 
 	# A tiled bottom landing joins the last tread to the opening in the chamber wall.
 	var landing_material := _tile_material(tile_shader, 5.0, 3.0, 0.54, 0.56)
@@ -151,11 +170,11 @@ func _build_chamber(root: Node3D, tile_shader: Shader) -> void:
 	for side in [-1.0, 1.0]:
 		_solid_box(
 			root,
-			Vector3(side * wall_center_x, room_center_y, wall_center_z),
+			Vector3(float(side) * wall_center_x, room_center_y, wall_center_z),
 			side_wall_size,
 			backing
 		)
-		var inner_x: float = side * (half_width - WALL_THICKNESS)
+		var inner_x: float = float(side) * (half_width - WALL_THICKNESS)
 		var yaw := PI * 0.5 if side < 0.0 else -PI * 0.5
 		var side_basis := Basis(Vector3.UP, yaw) * Basis(Vector3.RIGHT, PI * 0.5)
 		_tile_plane(
@@ -175,7 +194,7 @@ func _build_chamber(root: Node3D, tile_shader: Shader) -> void:
 	)
 	_tile_plane(
 		root,
-		Vector3(0.0, room_center_y, ROOM_BACK_Z + WALL_THICKNESS * 0.5),
+		Vector3(0.0, room_center_y, ROOM_BACK_Z),
 		Basis(Vector3.UP, PI) * Basis(Vector3.RIGHT, PI * 0.5),
 		Vector2(ROOM_WIDTH, ROOM_HEIGHT),
 		_tile_material(tile_shader, 35.0, 7.0, 0.70, 0.66)
@@ -187,12 +206,12 @@ func _build_chamber(root: Node3D, tile_shader: Shader) -> void:
 	var side_segment_x: float = doorway_width * 0.5 + side_segment_width * 0.5
 	var front_wall_center_z: float = ROOM_FRONT_Z + WALL_THICKNESS * 0.5
 	for side in [-1.0, 1.0]:
-		var wall_center := Vector3(side * side_segment_x, room_center_y, front_wall_center_z)
+		var wall_center := Vector3(float(side) * side_segment_x, room_center_y, front_wall_center_z)
 		var wall_size := Vector3(side_segment_width, ROOM_HEIGHT, WALL_THICKNESS)
 		_solid_box(root, wall_center, wall_size, backing)
 		_tile_plane(
 			root,
-			Vector3(side * side_segment_x, room_center_y, ROOM_FRONT_Z),
+			Vector3(float(side) * side_segment_x, room_center_y, ROOM_FRONT_Z),
 			Basis(Vector3.RIGHT, PI * 0.5),
 			Vector2(side_segment_width, ROOM_HEIGHT),
 			_tile_material(tile_shader, 15.0, 7.0, 0.66, 0.62)
@@ -218,16 +237,19 @@ func _build_chamber(root: Node3D, tile_shader: Shader) -> void:
 	# Four blunt tiled piers break the scale of the room without blocking its open center.
 	for x in [-11.0, 11.0]:
 		for z in [-72.5, -87.0]:
-			var pier_size := Vector3(0.82, ROOM_HEIGHT - 0.35, 0.82)
-			_solid_box(root, Vector3(x, room_center_y, z), pier_size, backing)
+			var pier_x: float = float(x)
+			var pier_z: float = float(z)
+			var pier_height: float = ROOM_HEIGHT - 0.12
+			var pier_size := Vector3(0.82, pier_height, 0.82)
+			_solid_box(root, Vector3(pier_x, room_center_y, pier_z), pier_size, backing)
 			var pier_y: float = room_center_y
 			var pier_material := _tile_material(tile_shader, 1.0, 7.0, 0.64, 0.60)
 			# Front face of each pier catches the cold ceiling light.
 			_tile_plane(
 				root,
-				Vector3(x, pier_y, z + 0.416),
+				Vector3(pier_x, pier_y, pier_z + 0.416),
 				Basis(Vector3.RIGHT, PI * 0.5),
-				Vector2(0.82, ROOM_HEIGHT - 0.35),
+				Vector2(0.82, pier_height),
 				pier_material
 			)
 

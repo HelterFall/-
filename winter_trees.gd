@@ -53,7 +53,7 @@ func _build_birch(
 		var ratio: float = random.randf_range(0.12, 0.91)
 		var y: float = height * ratio
 		var angle: float = random.randf_range(0.0, TAU)
-		var radius: float = lerpf(0.218, 0.072, ratio) + 0.012
+		var radius: float = lerpf(0.245, 0.065, ratio) + 0.010
 		var normal := Vector3(cos(angle), 0.0, sin(angle))
 		var center: Vector3 = base + lean * ratio + Vector3(0.0, y, 0.0) + normal * radius
 		var mark := _box(
@@ -62,14 +62,14 @@ func _build_birch(
 			Vector3(random.randf_range(0.055, 0.19), random.randf_range(0.018, 0.043), 0.012),
 			bark_dark if mark_index % 3 != 0 else bark_mid
 		)
-		mark.rotation.y = angle + random.randf_range(-0.18, 0.18)
+		mark.rotation.y = PI * 0.5 - angle + random.randf_range(-0.18, 0.18)
 
 	# Несколько длинных светлых участков коры дают стволу объём в боковом свете.
 	for strip_index in range(5):
 		var ratio: float = random.randf_range(0.20, 0.78)
 		var y: float = height * ratio
 		var angle: float = float(strip_index) * TAU / 5.0 + random.randf_range(-0.2, 0.2)
-		var radius: float = lerpf(0.222, 0.075, ratio) + 0.008
+		var radius: float = lerpf(0.245, 0.065, ratio) + 0.010
 		var normal := Vector3(cos(angle), 0.0, sin(angle))
 		var strip := _box(
 			root,
@@ -77,7 +77,7 @@ func _build_birch(
 			Vector3(0.018, random.randf_range(0.24, 0.62), 0.01),
 			trunk_light
 		)
-		strip.rotation.y = angle
+		strip.rotation.y = PI * 0.5 - angle
 
 	# Ветви идут вокруг ствола на разных высотах, а не лежат в одной плоскости.
 	for branch_index in range(11):

@@ -56,13 +56,30 @@ func _build_stairwell(root: Node3D, tile_shader: Shader) -> void:
 			edge_concrete
 		)
 
+	# A hidden smooth collision ramp keeps the staircase traversable for the simple mobile controller.
+	var ramp_top_z: float = STAIR_START_Z + STAIR_DEPTH * 0.5
+	var ramp_bottom_z: float = STAIR_START_Z - float(STAIR_COUNT - 1) * STAIR_DEPTH - STAIR_DEPTH * 0.5
+	var ramp_length: float = ramp_top_z - ramp_bottom_z
+	var ramp_angle: float = -atan2(absf(ROOM_FLOOR_Y), ramp_length)
+	var ramp_center_z: float = (ramp_top_z + ramp_bottom_z) * 0.5
+	var ramp_center_y: float = ROOM_FLOOR_Y * 0.5 - 0.07 * cos(ramp_angle)
+	var ramp_body := StaticBody3D.new()
+	ramp_body.position = Vector3(0.0, ramp_center_y, ramp_center_z)
+	ramp_body.rotation.x = ramp_angle
+	var ramp_collision := CollisionShape3D.new()
+	var ramp_shape := BoxShape3D.new()
+	ramp_shape.size = Vector3(STAIR_WIDTH - 0.12, 0.14, ramp_length)
+	ramp_collision.shape = ramp_shape
+	ramp_body.add_child(ramp_collision)
+	root.add_child(ramp_body)
+
 	var tread_material := _tile_material(tile_shader, 5.0, 1.0, 0.52, 0.48)
 	var riser_material := _tile_material(tile_shader, 5.0, 1.0, 0.60, 0.66)
 	var step_block := _material(Color(0.30, 0.32, 0.33), 0.95)
 	for step_index in range(step_count):
 		var level_y: float = -float(step_index) * STAIR_RISE
 		var z: float = STAIR_START_Z - float(step_index) * STAIR_DEPTH
-		_solid_box(
+		_visual_box(
 			root,
 			Vector3(0.0, level_y - 0.18, z),
 			Vector3(STAIR_WIDTH, 0.36, STAIR_DEPTH),
@@ -122,9 +139,9 @@ func _build_stairwell(root: Node3D, tile_shader: Shader) -> void:
 	)
 
 	# Worn concrete caps and a dim warning lamp mark the entrance at ground level.
-	_solid_box(root, Vector3(0.0, 0.24, -37.10), Vector3(6.6, 0.42, 0.42), edge_concrete)
-	_solid_box(root, Vector3(-3.15, 0.44, -37.60), Vector3(0.5, 0.34, 0.42), edge_concrete)
-	_solid_box(root, Vector3(3.15, 0.44, -37.60), Vector3(0.5, 0.34, 0.42), edge_concrete)
+	_solid_box(root, Vector3(0.0, 2.80, -37.10), Vector3(6.6, 0.42, 0.42), edge_concrete)
+	_solid_box(root, Vector3(-3.15, 1.40, -37.60), Vector3(0.5, 2.8, 0.42), edge_concrete)
+	_solid_box(root, Vector3(3.15, 1.40, -37.60), Vector3(0.5, 2.8, 0.42), edge_concrete)
 
 
 func _build_chamber(root: Node3D, tile_shader: Shader) -> void:
@@ -295,6 +312,17 @@ func _build_lighting(root: Node3D) -> void:
 		glow.light_energy = 0.8
 		glow.omni_range = 5.5
 		root.add_child(glow)
+
+
+func _visual_box(parent: Node3D, center: Vector3, size: Vector3, material: Material) -> MeshInstance3D:
+	var mesh_instance := MeshInstance3D.new()
+	var box_mesh := BoxMesh.new()
+	box_mesh.size = size
+	mesh_instance.mesh = box_mesh
+	mesh_instance.position = center
+	mesh_instance.material_override = material
+	parent.add_child(mesh_instance)
+	return mesh_instance
 
 
 func _solid_box(parent: Node3D, center: Vector3, size: Vector3, material: Material) -> StaticBody3D:

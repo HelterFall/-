@@ -13,6 +13,9 @@ func _build_world() -> void:
 	_build_world_environment()
 	_build_ground()
 	_build_buildings()
+	var underground_script: Script = load("res://underground_complex.gd")
+	var underground_visuals: RefCounted = underground_script.new()
+	underground_visuals.call("build", self)
 	_build_playground()
 	var yard_visuals_script: Script = load("res://yard_visuals.gd")
 	var yard_visuals: RefCounted = yard_visuals_script.new()
@@ -118,7 +121,11 @@ func _build_ground() -> void:
 	packed_snow.set_shader_parameter("wetness", 0.34)
 	packed_snow.set_shader_parameter("normal_strength", 0.82)
 
-	_box(self, Vector3(0.0, -0.24, -8.0), Vector3(100.0, 0.48, 100.0), snow, true)
+	# The snow slab is split around a long narrow opening for the hidden stairwell.
+	_box(self, Vector3(-26.75, -0.24, -29.0), Vector3(46.5, 0.48, 142.0), snow, true)
+	_box(self, Vector3(26.75, -0.24, -29.0), Vector3(46.5, 0.48, 142.0), snow, true)
+	_box(self, Vector3(0.0, -0.24, 2.5), Vector3(7.0, 0.48, 79.0), snow, true)
+	_box(self, Vector3(0.0, -0.24, -81.5), Vector3(7.0, 0.48, 37.0), snow, true)
 	_box(self, Vector3(0.0, 0.015, 6.0), Vector3(3.4, 0.035, 45.0), packed_snow)
 	_box(self, Vector3(-7.0, 0.015, -9.0), Vector3(1.2, 0.035, 30.0), packed_snow)
 	_box(self, Vector3(7.0, 0.015, -9.0), Vector3(1.2, 0.035, 30.0), packed_snow)

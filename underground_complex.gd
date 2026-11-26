@@ -137,7 +137,7 @@ func _build_chamber(root: Node3D, tile_shader: Shader) -> void:
 	var backing := _material(Color(0.23, 0.25, 0.27), 0.96)
 	var room_center_y: float = (ROOM_FLOOR_Y + ROOM_CEILING_Y) * 0.5
 	var half_width: float = ROOM_WIDTH * 0.5
-		var wall_center_x: float = half_width - WALL_THICKNESS * 0.5
+	var wall_center_x: float = half_width - WALL_THICKNESS * 0.5
 	var wall_center_z: float = ROOM_CENTER_Z
 
 	# A single large, walkable chamber with a continuous tiled floor and ceiling.

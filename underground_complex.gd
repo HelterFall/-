@@ -124,19 +124,8 @@ func _build_stairwell(root: Node3D, tile_shader: Shader) -> void:
 
 	# A tiled bottom landing joins the last tread to the opening in the chamber wall.
 	var landing_material := _tile_material(tile_shader, 5.0, 3.0, 0.54, 0.56)
-	_solid_box(
-		root,
-		Vector3(0.0, ROOM_FLOOR_Y - 0.18, -61.35),
-		Vector3(STAIR_WIDTH, 0.36, 2.7),
-		step_block
-	)
-	_tile_plane(
-		root,
-		Vector3(0.0, ROOM_FLOOR_Y + 0.006, -61.35),
-		Basis.IDENTITY,
-		Vector2(STAIR_WIDTH - 0.06, 2.66),
-		landing_material
-	)
+	_solid_box(root, Vector3(0.0, ROOM_FLOOR_Y - 0.18, -61.35), Vector3(STAIR_WIDTH, 0.36, 2.7), step_block)
+	_tile_plane(root, Vector3(0.0, ROOM_FLOOR_Y + 0.006, -61.35), Basis.IDENTITY, Vector2(STAIR_WIDTH - 0.06, 2.66), landing_material)
 
 	# Worn concrete caps and a dim warning lamp mark the entrance at ground level.
 	_solid_box(root, Vector3(0.0, 2.80, -37.10), Vector3(6.6, 0.42, 0.42), edge_concrete)

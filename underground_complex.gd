@@ -200,7 +200,7 @@ func _build_chamber(root: Node3D, tile_shader: Shader) -> void:
 	_tile_plane(
 		root,
 		Vector3(0.0, room_center_y, ROOM_BACK_Z + 0.008),
-		Basis(Vector3.UP, PI) * Basis(Vector3.RIGHT, PI * 0.5),
+		Basis(Vector3.RIGHT, PI * 0.5),
 		Vector2(ROOM_WIDTH, ROOM_HEIGHT),
 		_tile_material(tile_shader, 35.0, 7.0, 0.70, 0.66)
 	)
@@ -217,7 +217,7 @@ func _build_chamber(root: Node3D, tile_shader: Shader) -> void:
 		_tile_plane(
 			root,
 			Vector3(float(side) * side_segment_x, room_center_y, ROOM_FRONT_Z - 0.008),
-			Basis(Vector3.RIGHT, PI * 0.5),
+			Basis(Vector3.UP, PI) * Basis(Vector3.RIGHT, PI * 0.5),
 			Vector2(side_segment_width, ROOM_HEIGHT),
 			_tile_material(tile_shader, 15.0, 7.0, 0.66, 0.62)
 		)
@@ -234,7 +234,7 @@ func _build_chamber(root: Node3D, tile_shader: Shader) -> void:
 	_tile_plane(
 		root,
 		Vector3(0.0, lintel_center_y, ROOM_FRONT_Z - 0.008),
-		Basis(Vector3.RIGHT, PI * 0.5),
+		Basis(Vector3.UP, PI) * Basis(Vector3.RIGHT, PI * 0.5),
 		Vector2(doorway_width, lintel_height),
 		_tile_material(tile_shader, 5.0, 3.0, 0.60, 0.64)
 	)
